@@ -66,19 +66,18 @@ class Wplt {
 	 * @since    1.0.0
 	 */
 	public function __construct() {
-		/**
-		 * Define plugin version.
-		 */
+
+		// Define plugin version.
 		if ( defined( 'WPLT_VERSION' ) ) {
 			$this->version = WPLT_VERSION;
 		} else {
 			$this->version = '1.0.0';
 		}
+
 		// Define plugin name.
 		$this->plugin_name = 'wplt';
-		/**
-		 * Define plugin directory.
-		 */
+
+		// Define plugin directory.
 		if ( ! defined( 'WPLT_DIR' ) ) {
 			define( 'WPLT_DIR', plugin_dir_path( __DIR__ ) );
 		}
@@ -89,25 +88,19 @@ class Wplt {
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
 
+		// Debug purposes.
 		add_action( 'wp_footer', [ $this, 'test' ] );
 	}
 
+	/**
+	 * Debug purposes
+	 */
 	public function test() {
-		var_dump( Wplt_Pages::get_pages() );
+
 	}
 
 	/**
 	 * Load the required dependencies for this plugin.
-	 *
-	 * Include the following files that make up the plugin:
-	 *
-	 * - Wplt_Loader. Orchestrates the hooks of the plugin.
-	 * - Wplt_i18n. Defines internationalization functionality.
-	 * - Wplt_Admin. Defines all hooks for the admin area.
-	 * - Wplt_Public. Defines all hooks for the public side of the site.
-	 *
-	 * Create an instance of the loader which will be used to register the hooks
-	 * with WordPress.
 	 *
 	 * @since    1.0.0
 	 * @access   private
@@ -115,9 +108,19 @@ class Wplt {
 	private function load_dependencies() {
 
 		/**
-		 * Get neccecary plugin pages.
+		 * Get plugin config class.
+		 */
+		require_once WPLT_DIR . 'includes/class-wplt-config.php';
+
+		/**
+		 * Plugin pages class.
 		 */
 		require_once WPLT_DIR . 'includes/class-wplt-pages.php';
+
+		/**
+		 * Plugin functions.
+		 */
+		require_once WPLT_DIR . 'includes/functions.php';
 
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
