@@ -145,6 +145,11 @@ class Wplt {
 		 */
 		require_once WPLT_DIR . 'public/class-wplt-public.php';
 
+		/**
+		 * The class responsible for registering and rendering our shortcodes.
+		 */
+		require_once WPLT_DIR . 'includes/class-wplt-shortcodes.php';
+
 		$this->loader = new Wplt_Loader();
 	}
 

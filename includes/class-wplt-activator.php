@@ -47,12 +47,27 @@ class Wplt_Activator {
 					'post_content' => ( isset( $page_array['content'] ) ) ? $page_array['content'] : '',
 					'post_status'  => 'publish',
 				];
-				// Insert the page into the database.
+				/**
+				 * Do an action before the page is inserted
+				 * so themes and plugins can hook into this.
+				 */
+				do_action( 'wptl_pages_before_insert', $args );
+
+				/**
+				 * Insert the page into the database, and add it's id into options
+				 */
 				$page_id = wp_insert_post( $args );
-				// Add page id to site options.
 				if ( $page_id && ! is_wp_error( $page_id ) ) {
 					update_option( 'wplt-page-' . $slug, $page_id );
 				}
+
+				/**
+				 * Do an action after the page is inserted
+				 * so themes and plugins can hook into this.
+				 * This is usefull when you want to insert post metadata,
+				 * update post with different content, etc.
+				 */
+				do_action( 'wptl_pages_after_insert', $page_id );
 			}
 		}
 	}

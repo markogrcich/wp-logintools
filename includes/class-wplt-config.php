@@ -28,7 +28,7 @@ class Wplt_Config {
 		$defaults = [
 			'login'         => [
 				'title'     => __( 'Login', 'wplt' ), // Page title.
-				'content'   => '[wplt-login]', // Page content.
+				'content'   => '[wplt-login]', // Page content. Shortcode must be in a format of [wptl- ' . $array_key . ' ].
 				'protected' => true, // Is the page protected from moving to trash, or changing the post status.
 			],
 			'register'      => [
