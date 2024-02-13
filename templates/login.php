@@ -11,6 +11,18 @@
  */
 
 /**
+ * If user is already logged in, redirect to home page.
+ */
+if ( is_user_logged_in() && ! is_admin() ) {
+	wp_safe_redirect(
+		apply_filters(
+			'wplt_logged_in_redirect',
+			home_url( '/' )
+		)
+	);
+}
+
+/**
  * WordPress wp_login_form() defaults.
  */
 $defaults = [
@@ -49,6 +61,8 @@ $wplt_defaults = apply_filters(
 		'class_rememberme'       => 'input',
 		'class_rememberme_label' => '',
 		'class_button'           => 'button button-primary',
+		'links_register'         => true,
+		'links_home'             => true,
 	]
 );
 
@@ -225,3 +239,7 @@ do_action( 'wplt_login_form_before', $args );
  * @param array $args Array of login form arguments.
  */
 do_action( 'wplt_login_form_after', $args );
+
+if ( $args['links_register'] ) :
+
+endif;
