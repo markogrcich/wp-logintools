@@ -86,6 +86,7 @@ class Wplt {
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
+		$this->define_filters();
 		$this->define_public_hooks();
 
 		// Debug purposes.
@@ -129,6 +130,11 @@ class Wplt {
 		require_once WPLT_DIR . 'includes/class-wplt-loader.php';
 
 		/**
+		 * Manage plugin redirects
+		 */
+		require_once WPLT_DIR . 'includes/class-wplt-redirects.php';
+
+		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
@@ -140,6 +146,12 @@ class Wplt {
 		require_once WPLT_DIR . 'admin/class-wplt-admin.php';
 
 		/**
+		 * The class responsible for defining all actions that occur in private side
+		 * of the site.
+		 */
+		require_once WPLT_DIR . 'private/class-wplt-private.php';
+
+		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
 		 */
@@ -149,6 +161,11 @@ class Wplt {
 		 * The class responsible for registering and rendering our shortcodes.
 		 */
 		require_once WPLT_DIR . 'includes/class-wplt-shortcodes.php';
+
+		/**
+		 * The class responsible for displaying notifications, like errors, login messages, etc.
+		 */
+		require_once WPLT_DIR . 'includes/class-wplt-notifications.php';
 
 		$this->loader = new Wplt_Loader();
 	}
@@ -197,6 +214,19 @@ class Wplt {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+	}
+
+	/**
+	 * Register plugins filter functionalities.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function define_filters() {
+
+		$plugin_private = new Wplt_Private( $this->get_plugin_name(), $this->get_version() );
+
+		$this->loader->add_filter( 'query_vars', $plugin_private, 'add_query_vars' );
 	}
 
 	/**

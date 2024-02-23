@@ -136,3 +136,82 @@ if ( ! function_exists( 'wplt_get_template_part' ) ) {
 		}
 	}
 }
+
+/**
+ * Encode WP Error for usage in query vars.
+ *
+ * @param object $error WP_Error object.
+ */
+function wplt_encode_error( $error = null ) {
+	// Bail early.
+	if ( ! $error || ! is_wp_error( $error ) ) {
+		return false;
+	}
+	return rawurlencode( base64_encode( wp_json_encode( $error ) ) ); // phpcs:ignore
+}
+
+/**
+ * Decode WP Error from a query var.
+ *
+ * @param string $error String representing coded error.
+ */
+function wplt_decode_error( $error = null ) {
+	// Bail early.
+	if ( ! $error ) {
+		return false;
+	}
+	$error_decoded = json_decode( base64_decode( rawurldecode( $error ) ) ); // phpcs:ignore
+	if ( $error_decoded && is_object( $error_decoded ) ) {
+		// Count data.
+		$i = 0;
+		// Start by creating an empty WP_Error object.
+		$wp_error = new WP_Error();
+		// Check if there are any errors to process.
+		if ( property_exists( $error_decoded, 'errors' ) && ! empty( $error_decoded->errors ) ) {
+			foreach ( $error_decoded->errors as $code => $messages ) {
+				foreach ( $messages as $message ) {
+					// Add each error code and message to the WP_Error object.
+					$wp_error->add( $code, $message );
+					// Data was added.
+					++$i;
+				}
+			}
+		}
+
+		// If object contains error data.
+		if ( property_exists( $error_decoded, 'error_data' ) && ! empty( $error_decoded->error_data ) ) {
+			foreach ( $error_decoded->error_data as $code => $data ) {
+				// Here you would associate your error data with an existing error code.
+				// This assumes you have a mechanism to match error_data keys to your error codes.
+				$wp_error->add_data( $data, $code );
+				// Data was added.
+				++$i;
+			}
+		}
+		// If data was added, return an error.
+		if ( $i ) {
+			return $wp_error;
+		}
+	}
+	return false;
+}
+
+if ( ! function_exists( 'wplt_show_message' ) ) {
+	/**
+	 * Displays the given error message.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param string|WP_Error $message Sting or an error representing a message to show.
+	 */
+	function wplt_show_message( $message ) {
+		if ( is_wp_error( $message ) ) {
+			if ( $message->get_error_data() && is_string( $message->get_error_data() ) ) {
+				$message = $message->get_error_message() . ': ' . $message->get_error_data();
+			} else {
+				$message = $message->get_error_message();
+			}
+		}
+		echo "<p>$message</p>\n"; // phpcs:ignore
+	}
+}

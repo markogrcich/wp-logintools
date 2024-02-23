@@ -38,7 +38,7 @@ $defaults = [
 	'id_remember'    => 'rememberme',
 	'id_submit'      => 'wp-submit',
 	'remember'       => true,
-	'value_username' => '',
+	'value_username' => ( isset( $_POST['user_login'] ) && is_string( $_POST['user_login'] ) ) ? wp_unslash( $_POST['user_login'] ) : '', // phpcs:ignore.
 	// Set 'value_remember' to true to default the "Remember me" checkbox to checked.
 	'value_remember' => false,
 ];
@@ -51,18 +51,21 @@ $defaults = [
 $wplt_defaults = apply_filters(
 	'wplt_login_form_defaults',
 	[
-		'containers'             => true,
-		'placeholder_username'   => __( 'Username or Email', 'wplt' ),
-		'placeholder_password'   => __( '••••••••', 'wplt' ),
-		'class_username'         => 'input',
-		'class_username_label'   => '',
-		'class_password'         => 'input',
-		'class_password_label'   => '',
-		'class_rememberme'       => 'input',
-		'class_rememberme_label' => '',
-		'class_button'           => 'button button-primary',
-		'links_register'         => true,
-		'links_home'             => true,
+		'containers'                    => true,
+		'placeholder_username'          => __( 'Username or Email', 'wplt' ),
+		'placeholder_password'          => __( '••••••••', 'wplt' ),
+		'class_form'                    => 'wp-login-form',
+		'class_username'                => 'input',
+		'class_username_label'          => '',
+		'class_password'                => 'input',
+		'class_password_label'          => '',
+		'class_rememberme'              => 'input',
+		'class_rememberme_label'        => '',
+		'class_button'                  => 'button button-primary',
+		'links_nav'                     => true,
+		'class_nav_links_nav'           => 'wp-login-links',
+		'class_nav_links_register'      => 'wp-login-register',
+		'class_nav_links_lost_password' => 'wp-login-lost-password',
 	]
 );
 
@@ -111,13 +114,22 @@ $login_form_bottom = apply_filters( 'login_form_bottom', '', $args );
 
 <?php
 /**
+ * Notifications markup, like login errors and other notifications.
+ *
+ * @param int Page ID.
+ */
+do_action( 'wplt_notifications', get_the_ID() );
+?>
+
+<?php
+/**
  * Markup to be printed before the login form.
  *
  * @param array $args Array of login form arguments.
  */
 do_action( 'wplt_login_form_before', $args );
 ?>
-	<form name="<?php echo esc_attr( $args['form_id'] ); ?>" id="<?php echo esc_attr( $args['form_id'] ); ?>" action="<?php echo esc_url( site_url( 'wp-login.php', 'login_post' ) ); ?>" method="post">
+	<form name="<?php echo esc_attr( $args['form_id'] ); ?>" id="<?php echo esc_attr( $args['form_id'] ); ?>" action="<?php echo esc_url( site_url( 'wp-login.php', 'login_post' ) ); ?>" method="post"<?php echo ( $args['class_form'] ) ? 'class="' . esc_attr( $args['class_form'] ) . '"' : ''; ?>>
 		<?php echo $login_form_top; // phpcs:ignore ?>
 			<?php
 			/**
@@ -135,7 +147,7 @@ do_action( 'wplt_login_form_before', $args );
 						<?php echo esc_html( $args['label_username'] ); ?>
 					</label>
 				<?php endif; ?>
-				<input type="text" name="log" id="<?php echo esc_attr( $args['id_username'] ); ?>" autocomplete="username" class="<?php echo esc_attr( $args['class_username'] ); ?>" value="<?php echo esc_attr( $args['value_username'] ); ?>" placeholder="<?php echo esc_attr( $args['placeholder_username'] ); ?>" size="20" />
+				<input type="text" name="log" id="<?php echo esc_attr( $args['id_username'] ); ?>" autocomplete="username" required class="<?php echo esc_attr( $args['class_username'] ); ?>" value="<?php echo esc_attr( $args['value_username'] ); ?>" placeholder="<?php echo esc_attr( $args['placeholder_username'] ); ?>" size="20" />
 			<?php if ( $args['containers'] ) : ?>
 				</p>
 			<?php endif; ?>
@@ -163,7 +175,7 @@ do_action( 'wplt_login_form_before', $args );
 						<?php echo esc_html( $args['label_password'] ); ?>
 					</label>
 				<?php endif; ?>
-				<input type="password" name="pwd" id="<?php echo esc_attr( $args['id_password'] ); ?>" autocomplete="current-password" spellcheck="false" class="<?php echo esc_attr( $args['class_password'] ); ?>" value="" placeholder="<?php echo esc_attr( $args['placeholder_password'] ); ?>" size="20" />
+				<input type="password" name="pwd" id="<?php echo esc_attr( $args['id_password'] ); ?>" autocomplete="current-password" spellcheck="false" required class="<?php echo esc_attr( $args['class_password'] ); ?>" value="" placeholder="<?php echo esc_attr( $args['placeholder_password'] ); ?>" size="20" />
 			<?php if ( $args['containers'] ) : ?>
 				</p>
 			<?php endif; ?>
@@ -240,6 +252,51 @@ do_action( 'wplt_login_form_before', $args );
  */
 do_action( 'wplt_login_form_after', $args );
 
-if ( $args['links_register'] ) :
-
+/**
+ * Check if we need to print login nav links after the form.
+ */
+if ( $args['links_nav'] ) :
+	/**
+	 * Markup to be printed before the login navigation.
+	 *
+	 * @param array $args Array of login form arguments.
+	 */
+	do_action( 'wplt_login_nav_before', $args );
+	/**
+	 * Filters the separator used between login form navigation links.
+	 *
+	 * @param string $login_link_separator The separator used between login form navigation links.
+	 */
+	$login_link_separator = apply_filters( 'login_link_separator', ' | ' );
+	?>
+	<nav class="<?php echo esc_attr( $args['class_nav_links_nav'] ); ?>">
+		<?php
+		if ( get_option( 'users_can_register' ) ) :
+			echo wp_kses_post(
+				apply_filters(
+					'register', // This filter is documented in wp-includes/general-template.php.
+					sprintf( '<a class="%1s" href="%2s">%3s</a>', esc_attr( $args['class_nav_links_register'] ), esc_url( wp_registration_url() ), __( 'Register', 'wplt' ) )
+				)
+			);
+			?>
+			<?php echo esc_html( $login_link_separator ); ?>
+		<?php endif; ?>
+		<?php
+			echo wp_kses_post(
+				apply_filters(
+					'lost_password_html_link', // This filter is documented in wp-login.php.
+					sprintf( '<a class="%1s" href="%2s">%3s</a>', esc_attr( $args['class_nav_links_lost_password'] ), esc_url( wp_lostpassword_url() ), __( 'Lost your password?' ) )
+				)
+			);
+		?>
+	</nav>
+	<?php
+	/**
+	 * Markup to be printed after the login navigation.
+	 *
+	 * @param array $args Array of login form arguments.
+	 */
+	do_action( 'wplt_login_nav_after', $args );
+	?>
+	<?php
 endif;
