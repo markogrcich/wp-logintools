@@ -33,10 +33,10 @@ $defaults = [
 	// Default 'redirect' value takes the user back to the request URI.
 	'redirect'       => ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], // phpcs:ignore
 	'form_id'        => 'loginform',
-	'label_username' => __( 'Username or Email Address' ),
-	'label_password' => __( 'Password' ),
-	'label_remember' => __( 'Remember Me' ),
-	'label_log_in'   => __( 'Log In' ),
+	'label_username' => __( 'Username or Email Address', 'wplt' ),
+	'label_password' => __( 'Password', 'wplt' ),
+	'label_remember' => __( 'Remember Me', 'wplt' ),
+	'label_log_in'   => __( 'Log In', 'wplt' ),
 	'id_username'    => 'user_login',
 	'id_password'    => 'user_pass',
 	'id_remember'    => 'rememberme',

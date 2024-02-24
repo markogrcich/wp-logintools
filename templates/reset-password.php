@@ -34,7 +34,7 @@ $defaults = [
 	'redirect'     => ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], // phpcs:ignore
 	'form_id'        => 'resetpassform',
 	'value_username' => ( isset( $_GET['login'] ) && is_string( $_GET['login'] ) ) ? wp_unslash( $_GET['login'] ) : '', // phpcs:ignore.
-	'label_log_in'   => __( 'Save Password' ),
+	'label_log_in'   => __( 'Save Password', 'wplt' ),
 	'id_submit'      => 'wp-submit',
 ];
 

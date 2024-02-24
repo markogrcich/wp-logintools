@@ -33,8 +33,8 @@ $defaults = [
 	// Default 'redirect' value takes the user back to the request URI.
 	'redirect'       => ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], // phpcs:ignore
 	'form_id'        => 'lostpasswordform',
-	'label_username' => __( 'Username or Email Address' ),
-	'label_log_in'   => __( 'Get New Password' ),
+	'label_username' => __( 'Username or Email Address', 'wplt' ),
+	'label_log_in'   => __( 'Get New Password', 'wplt' ),
 	'id_username'    => 'user_login',
 	'id_submit'      => 'wp-submit',
 	'value_username' => ( isset( $_POST['user_login'] ) && is_string( $_POST['user_login'] ) ) ? wp_unslash( $_POST['user_login'] ) : '', // phpcs:ignore.

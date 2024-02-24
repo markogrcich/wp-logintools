@@ -58,19 +58,6 @@ class Wplt_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Wplt_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Wplt_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/wplt-public.css', array(), $this->version, 'all' );
 	}
 
@@ -80,22 +67,14 @@ class Wplt_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Wplt_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Wplt_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wplt-public.js', [ 'jquery' ], $this->version, false );
-		wp_enqueue_script( 'jquery' );
-		wp_enqueue_script( 'utils' );
-		wp_enqueue_script( 'user-profile' );
+		/**
+		 * Enqueue only on "reset-password" page
+		 */
+		if ( wplt_is_page( 'reset-password' ) ) {
+			wp_enqueue_script( 'jquery' );
+			wp_enqueue_script( 'utils' );
+			wp_enqueue_script( 'user-profile' );
+		}
 	}
 }
