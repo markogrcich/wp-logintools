@@ -26,22 +26,27 @@ class Wplt_Config {
 		 * Default pages to be created.
 		 */
 		$defaults = [
-			'login'         => [
+			'login'          => [
 				'title'     => __( 'Login', 'wplt' ), // Page title.
 				'content'   => '[wplt-login]', // Page content. Shortcode must be in a format of [wptl- ' . $array_key . ' ].
 				'protected' => true, // Is the page protected from moving to trash, or changing the post status.
 			],
-			'register'      => [
+			'register'       => [
 				'title'     => __( 'Register', 'wplt' ),
 				'content'   => '[wplt-register]',
 				'protected' => true,
 			],
-			'lost-password' => [
+			'lost-password'  => [
 				'title'     => __( 'Lost Password', 'wplt' ),
 				'content'   => '[wplt-lost-password]',
 				'protected' => true,
 			],
-			'account'       => [
+			'reset-password' => [
+				'title'     => __( 'Reset Password', 'wplt' ),
+				'content'   => '[wplt-reset-password]',
+				'protected' => true,
+			],
+			'account'        => [
 				'title'     => __( 'My Account', 'wplt' ),
 				'content'   => '[wplt-account]',
 				'protected' => true,

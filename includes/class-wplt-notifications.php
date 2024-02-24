@@ -26,16 +26,22 @@ class Wplt_Notifications {
 	 */
 	public function login_page_notifications() {
 		// Get errors.
-		$errors_query_var = get_query_var( 'wplt_error' );
+		$message_query_var = get_query_var( 'wplt_query' );
 
 		// Bail early if there is no errors.
-		if ( ! $errors_query_var ) {
+		if ( ! $message_query_var ) {
 			return;
 		}
 
-		$error_message = wplt_decode_error( $errors_query_var );
-		if ( ! is_wp_error( $error_message ) ) {
+		$message = wplt_decode_message( $message_query_var );
+		$type    = 'notice';
+		if ( ! $message ) {
 			return;
+		}
+
+		// If message is wp_error, change $type to "error".
+		if ( is_wp_error( $message ) ) {
+			$type = 'error';
 		}
 
 		// Print an error message notification.
@@ -43,8 +49,8 @@ class Wplt_Notifications {
 			'notification',
 			null,
 			[
-				'type'    => 'error',
-				'message' => $error_message,
+				'type'    => $type,
+				'message' => $message,
 			]
 		);
 	}

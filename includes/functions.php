@@ -138,42 +138,44 @@ if ( ! function_exists( 'wplt_get_template_part' ) ) {
 }
 
 /**
- * Encode WP Error for usage in query vars.
+ * Encode the message for usage in query vars. Can encode objects, stings and arrays.
  *
- * @param object $error WP_Error object.
+ * @param mixed $message WP_Error object / Array / String.
  */
-function wplt_encode_error( $error = null ) {
+function wplt_encode_message( $message = null ) {
 	// Bail early.
-	if ( ! $error || ! is_wp_error( $error ) ) {
+	if ( ! $message ) {
 		return false;
 	}
-	return rawurlencode( base64_encode( wp_json_encode( $error ) ) ); // phpcs:ignore
+	return rawurlencode( base64_encode( wp_json_encode( $message ) ) ); // phpcs:ignore
 }
 
 /**
- * Decode WP Error from a query var.
+ * Decode a message from a query var.
  *
- * @param string $error String representing coded error.
+ * @param string $message String representing coded message from the wplt_encode_message() function.
  */
-function wplt_decode_error( $error = null ) {
+function wplt_decode_message( $message = null ) {
 	// Bail early.
-	if ( ! $error ) {
+	if ( ! $message ) {
 		return false;
 	}
-	$error_decoded = json_decode( base64_decode( rawurldecode( $error ) ) ); // phpcs:ignore
-	if ( $error_decoded && is_object( $error_decoded ) ) {
-		// Count data.
-		$i = 0;
-		// Start by creating an empty WP_Error object.
+	// Decode the error.
+	$error_decoded = json_decode( base64_decode( rawurldecode( $message ) ) ); // phpcs:ignore
+	if ( ! $error_decoded ) {
+		return false;
+	}
+	// Check if the error is decoded WP_Error object.
+	if ( is_object( $error_decoded ) && ( property_exists( $error_decoded, 'errors' ) || property_exists( $error_decoded, 'error_data' ) ) ) {
+		// Create an empty WP_Error object.
 		$wp_error = new WP_Error();
+
 		// Check if there are any errors to process.
 		if ( property_exists( $error_decoded, 'errors' ) && ! empty( $error_decoded->errors ) ) {
 			foreach ( $error_decoded->errors as $code => $messages ) {
 				foreach ( $messages as $message ) {
 					// Add each error code and message to the WP_Error object.
 					$wp_error->add( $code, $message );
-					// Data was added.
-					++$i;
 				}
 			}
 		}
@@ -184,16 +186,15 @@ function wplt_decode_error( $error = null ) {
 				// Here you would associate your error data with an existing error code.
 				// This assumes you have a mechanism to match error_data keys to your error codes.
 				$wp_error->add_data( $data, $code );
-				// Data was added.
-				++$i;
 			}
 		}
-		// If data was added, return an error.
-		if ( $i ) {
-			return $wp_error;
-		}
+
+		// Return an error.
+		return $wp_error;
 	}
-	return false;
+
+	// Return decoded error.
+	return $error_decoded;
 }
 
 if ( ! function_exists( 'wplt_show_message' ) ) {
@@ -212,6 +213,8 @@ if ( ! function_exists( 'wplt_show_message' ) ) {
 				$message = $message->get_error_message();
 			}
 		}
-		echo "<p>$message</p>\n"; // phpcs:ignore
+		?>
+		<?php echo wp_kses_post( wpautop( $message ) ); ?>
+		<?php
 	}
 }

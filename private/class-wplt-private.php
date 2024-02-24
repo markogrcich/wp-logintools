@@ -56,7 +56,7 @@ class Wplt_Private {
 	 * @param array $public_query_vars The array of allowed query variable names..
 	 */
 	public function add_query_vars( $public_query_vars ) {
-		$public_query_vars[] = 'wplt_error';
+		$public_query_vars[] = 'wplt_query';
 		return $public_query_vars;
 	}
 }

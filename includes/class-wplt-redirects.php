@@ -20,7 +20,11 @@ class Wplt_Redirects {
 		// Redirect from login form to our custom login page.
 		add_action( 'login_form_login', [ $this, 'redirect_from_login_page' ] );
 		// Redirect from login form to our custom login page, if there were any authenticate errors.
-		add_filter( 'authenticate', [ $this, 'redirect_after_authenticate' ], 101, 1 );
+		add_filter( 'authenticate', [ $this, 'redirect_after_login_authenticate' ], 101, 1 );
+		// Redirects the user to our custom "Forgot your password?" page.
+		add_action( 'login_form_lostpassword', [ $this, 'redirect_from_lostpassword' ] );
+		// On "lost password" page submit.
+		add_action( 'login_form_lostpassword', [ $this, 'lostpassword_page_submit' ] );
 	}
 
 	/**
@@ -86,7 +90,7 @@ class Wplt_Redirects {
 	 *
 	 * @return Wp_User|Wp_Error The logged in user, or error information if there were errors.
 	 */
-	public function redirect_after_authenticate( $user ) {
+	public function redirect_after_login_authenticate( $user ) {
 		// Check if login page is present.
 		$login_page = wplt_get_page_url( 'login' );
 
@@ -98,8 +102,8 @@ class Wplt_Redirects {
 		// Check if the earlier authenticate filter functions have found errors.
 		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 			if ( is_wp_error( $user ) ) {
-				$error_codes = rawurlencode( base64_encode( wp_json_encode( $user ) ) ); // phpcs:ignore
-				$login_url   = add_query_arg( 'wplt_error', $error_codes, $login_page );
+				$error_codes = wplt_encode_message( $user );
+				$login_url   = add_query_arg( 'wplt_query', $error_codes, $login_page );
 				wp_safe_redirect( $login_url );
 				exit;
 			}
@@ -107,6 +111,69 @@ class Wplt_Redirects {
 
 		// Return $user object.
 		return $user;
+	}
+
+	/**
+	 * Redirects the user to our custom "Forgot your password?" page instead of
+	 * wp-login.php?action=lostpassword.
+	 */
+	public function redirect_from_lostpassword() {
+		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' === $_SERVER['REQUEST_METHOD'] ) {
+			// Check if lost password page page is present.
+			$password_page = wplt_get_page_url( 'lost-password' );
+
+			// Bail early if login page is not present.
+			if ( ! $password_page ) {
+				exit;
+			}
+
+			// Set redirect url.
+			$redirect_to = isset( $_REQUEST['redirect_to'] ) ? sanitize_url( wp_unslash( $_REQUEST['redirect_to'] ) ) : null; // phpcs:ignore
+
+			// Redirect logged in user.
+			if ( is_user_logged_in() ) {
+				$this->redirect_logged_in_user( $redirect_to );
+				exit;
+			}
+
+			// Redirect to our custom "lost-password" page.
+			wp_safe_redirect( $password_page );
+			exit;
+		}
+	}
+
+	/**
+	 * On "lost password" page submit.
+	 */
+	public function lostpassword_page_submit() {
+		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] ) {
+			// Check if lost password page page is present.
+			$password_page = wplt_get_page_url( 'lost-password' );
+
+			// Check if login page is present.
+			$login_page = wplt_get_page_url( 'login' );
+
+			// Bail early if login or "lost password" page is not present.
+			if ( ! $password_page || ! $login_page ) {
+				exit;
+			}
+
+			// Check the status of "retrive password".
+			$retrive_status = retrieve_password();
+			if ( is_wp_error( $retrive_status ) ) {
+				// Errors are found.
+				$message      = wplt_encode_message( $retrive_status );
+				$redirect_url = add_query_arg( 'wplt_query', $message, $password_page );
+			} else {
+				// Email sent, redirect to login page.
+				$message      = wplt_encode_message( __( 'Check your email for a link to reset your password', 'wplt' ) );
+				$redirect_url = add_query_arg( 'wplt_query', $message, $login_page );
+			}
+
+			// Redirect the user to the proper page.
+			wp_safe_redirect( $redirect_url );
+			exit;
+		}
 	}
 }
 new Wplt_Redirects();

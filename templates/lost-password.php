@@ -70,6 +70,15 @@ $args = wp_parse_args( $wplt_defaults, apply_filters( 'login_form_defaults', $de
 
 <?php
 /**
+ * Notifications markup, like login errors and other notifications.
+ *
+ * @param int Page ID.
+ */
+do_action( 'wplt_notifications', get_the_ID() );
+?>
+
+<?php
+/**
  * Markup to be printed before the lost password form.
  *
  * @param array $args Array of login form arguments.
