@@ -10,6 +10,9 @@
  * @subpackage Wplt/templates
  */
 
+// Get page id, to be used later on.
+$page_id = get_the_ID();
+
 /**
  * If user is already logged in, redirect to home page.
  */
@@ -17,7 +20,8 @@ if ( is_user_logged_in() && ! is_admin() ) {
 	wp_safe_redirect(
 		apply_filters(
 			'wplt_logged_in_redirect',
-			home_url( '/' )
+			home_url( '/' ),
+			$page_id
 		)
 	);
 }
@@ -72,9 +76,9 @@ $args = wp_parse_args( $wplt_defaults, apply_filters( 'login_form_defaults', $de
 /**
  * Notifications markup, like login errors and other notifications.
  *
- * @param int Page ID.
+ * @param int $page_id Page ID.
  */
-do_action( 'wplt_notifications', get_the_ID() );
+do_action( 'wplt_notifications', $page_id );
 ?>
 
 <?php
@@ -85,72 +89,72 @@ do_action( 'wplt_notifications', get_the_ID() );
  */
 do_action( 'wplt_lost_password_form_before', $args );
 ?>
-	<form name="<?php echo esc_attr( $args['form_id'] ); ?>" id="<?php echo esc_attr( $args['form_id'] ); ?>" action="<?php echo esc_url( network_site_url( 'wp-login.php?action=lostpassword', 'login_post' ) ); ?>" method="post"<?php echo ( $args['class_form'] ) ? 'class="' . esc_attr( $args['class_form'] ) . '"' : ''; ?>>
-			<?php
-			/**
-			 * Markup to be printed before the username input.
-			 *
-			 * @param array $args Array of login form arguments.
-			 */
-			do_action( 'wplt_login_username_before', $args );
-			?>
-			<?php if ( $args['containers'] ) : ?>
-				<p class="login-username">
-			<?php endif; ?>
-				<?php if ( $args['label_username'] ) : ?>
-					<label for="<?php echo esc_attr( $args['id_username'] ); ?>"<?php echo ( $args['class_username_label'] ) ? 'class="' . esc_attr( $args['class_username_label'] ) . '"' : ''; ?>>
-						<?php echo esc_html( $args['label_username'] ); ?>
-					</label>
-				<?php endif; ?>
-				<input type="text" name="user_login" id="<?php echo esc_attr( $args['id_username'] ); ?>" autocomplete="username" required class="<?php echo esc_attr( $args['class_username'] ); ?>" value="<?php echo esc_attr( $args['value_username'] ); ?>" placeholder="<?php echo esc_attr( $args['placeholder_username'] ); ?>" size="20" />
-			<?php if ( $args['containers'] ) : ?>
-				</p>
-			<?php endif; ?>
-			<?php
-			/**
-			 * Markup to be printed after the username input.
-			 *
-			 * @param array $args Array of login form arguments.
-			 */
-			do_action( 'wplt_login_username_after', $args );
-			?>
+<form name="<?php echo esc_attr( $args['form_id'] ); ?>" id="<?php echo esc_attr( $args['form_id'] ); ?>" action="<?php echo esc_url( network_site_url( 'wp-login.php?action=lostpassword', 'login_post' ) ); ?>" method="post"<?php echo ( $args['class_form'] ) ? 'class="' . esc_attr( $args['class_form'] ) . '"' : ''; ?>>
+	<?php
+	/**
+	 * Markup to be printed before the username input.
+	 *
+	 * @param array $args Array of login form arguments.
+	 */
+	do_action( 'wplt_login_username_before', $args );
+	?>
+	<?php if ( $args['containers'] ) : ?>
+		<p class="login-username">
+	<?php endif; ?>
+		<?php if ( $args['label_username'] ) : ?>
+			<label for="<?php echo esc_attr( $args['id_username'] ); ?>"<?php echo ( $args['class_username_label'] ) ? 'class="' . esc_attr( $args['class_username_label'] ) . '"' : ''; ?>>
+				<?php echo esc_html( $args['label_username'] ); ?>
+			</label>
+		<?php endif; ?>
+		<input type="text" name="user_login" id="<?php echo esc_attr( $args['id_username'] ); ?>" autocomplete="username" required class="<?php echo esc_attr( $args['class_username'] ); ?>" value="<?php echo esc_attr( $args['value_username'] ); ?>" placeholder="<?php echo esc_attr( $args['placeholder_username'] ); ?>" size="20" />
+	<?php if ( $args['containers'] ) : ?>
+		</p>
+	<?php endif; ?>
+	<?php
+	/**
+	 * Markup to be printed after the username input.
+	 *
+	 * @param array $args Array of login form arguments.
+	 */
+	do_action( 'wplt_login_username_after', $args );
+	?>
 
-			<?php
-			/**
-			 * Fires inside the lostpassword form tags, before the hidden fields.
-			 *
-			 * @since 2.1.0
-			 */
-			do_action( 'lostpassword_form' );
-			?>
+	<?php
+	/**
+	 * Fires inside the lostpassword form tags, before the hidden fields.
+	 *
+	 * @since 2.1.0
+	 */
+	do_action( 'lostpassword_form' );
+	?>
 
-			<?php
-			/**
-			 * Markup to be printed before the submit button.
-			 *
-			 * @param array $args Array of login form arguments.
-			 */
-			do_action( 'wplt_login_submit_before', $args );
-			?>
-			<?php if ( $args['containers'] ) : ?>
-				<p class="login-submit">
-			<?php endif; ?>
-				<button type="submit" name="wp-submit" id="<?php echo esc_attr( $args['id_submit'] ); ?>" class="<?php echo esc_attr( $args['class_button'] ); ?>">
-					<?php echo wp_kses_post( $args['label_log_in'] ); ?>
-				</button>
-				<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $args['redirect'] ); ?>" />
-			<?php if ( $args['containers'] ) : ?>
-				</p>
-			<?php endif; ?>
-			<?php
-			/**
-			 * Markup to be printed after the submit button.
-			 *
-			 * @param array $args Array of login form arguments.
-			 */
-			do_action( 'wplt_login_submit_after', $args );
-			?>
-	</form>
+	<?php
+	/**
+	 * Markup to be printed before the submit button.
+	 *
+	 * @param array $args Array of login form arguments.
+	 */
+	do_action( 'wplt_login_submit_before', $args );
+	?>
+	<?php if ( $args['containers'] ) : ?>
+		<p class="login-submit">
+	<?php endif; ?>
+		<button type="submit" name="wp-submit" id="<?php echo esc_attr( $args['id_submit'] ); ?>" class="<?php echo esc_attr( $args['class_button'] ); ?>">
+			<?php echo wp_kses_post( $args['label_log_in'] ); ?>
+		</button>
+		<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $args['redirect'] ); ?>" />
+	<?php if ( $args['containers'] ) : ?>
+		</p>
+	<?php endif; ?>
+	<?php
+	/**
+	 * Markup to be printed after the submit button.
+	 *
+	 * @param array $args Array of login form arguments.
+	 */
+	do_action( 'wplt_login_submit_after', $args );
+	?>
+</form>
 <?php
 /**
  * Markup to be printed after the login form.

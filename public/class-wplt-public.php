@@ -93,6 +93,9 @@ class Wplt_Public {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wplt-public.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wplt-public.js', [ 'jquery' ], $this->version, false );
+		wp_enqueue_script( 'jquery' );
+		wp_enqueue_script( 'utils' );
+		wp_enqueue_script( 'user-profile' );
 	}
 }

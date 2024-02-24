@@ -59,6 +59,15 @@ class Wplt_Shortcodes {
 	}
 
 	/**
+	 * Callback for the Reset Password shortcode.
+	 */
+	public function shortcode_callback_reset_password() {
+		ob_start();
+		wplt_get_template_part( 'reset-password' );
+		return ob_get_clean();
+	}
+
+	/**
 	 * Callback for the login shortcode.
 	 */
 	public function shortcode_callback_login() {
