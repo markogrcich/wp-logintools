@@ -135,6 +135,11 @@ class Wplt {
 		require_once WPLT_DIR . 'includes/class-wplt-redirects.php';
 
 		/**
+		 * Plugin function overwrites
+		 */
+		require_once WPLT_DIR . 'includes/class-wplt-function-rewrites.php';
+
+		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */

@@ -60,6 +60,7 @@ $wplt_defaults = apply_filters(
 		'class_password2'               => 'input',
 		'class_password_weak'           => 'pw-checkbox',
 		'class_password_label1'         => '',
+		'class_password_label2'         => '',
 		'class_button'                  => 'button button-primary',
 		'class_button_generate_pw'      => 'button wp-generate-pw hide-if-no-js skip-aria-expanded',
 		'label_button_generate_pw'      => __( 'Generate Password', 'wplt' ),
@@ -249,7 +250,7 @@ do_action( 'wplt_reset_password_form_before', $args );
 		<button type="submit" name="wp-submit" id="<?php echo esc_attr( $args['id_submit'] ); ?>" class="<?php echo esc_attr( $args['class_button'] ); ?>">
 			<?php echo wp_kses_post( $args['label_log_in'] ); ?>
 		</button>
-		<input type="hidden" id="user_login" value="<?php echo esc_attr( $args['value_username'] ); ?>" autocomplete="off">
+		<input type="hidden" name="rp_user" id="user_login" value="<?php echo esc_attr( $args['value_username'] ); ?>" autocomplete="off">
 		<input type="hidden" name="rp_key" value="<?php echo esc_attr( $args['reset_password_key'] ); ?>">
 		<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $args['redirect'] ); ?>" />
 	<?php if ( $args['containers'] ) : ?>

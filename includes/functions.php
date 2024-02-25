@@ -218,3 +218,28 @@ if ( ! function_exists( 'wplt_show_message' ) ) {
 		<?php
 	}
 }
+
+
+if ( ! function_exists( 'wplt_write_log' ) ) {
+	/**
+	 * DEBUG FUNCTION.Creates a log in /wp-content/debug.log
+	 * WP_DEBUG and WP_DEBUG_LOG must be enabled in wp-config.php for this to work.
+	 * Usefull for debugging $_POST and ajax requests.
+	 *
+	 * @param mixed $log Log file that we should output.
+	 */
+	function wplt_write_log( $log = '' ) {
+		// Bail early if WP_DEBUG and WP_DEBUG_LOG are not turned on.
+		if ( true !== WP_DEBUG || true !== WP_DEBUG_LOG ) {
+			return false;
+		}
+		// Check for the type of data we are outputing.
+		if ( is_array( $log ) || is_object( $log ) ) {
+			error_log( print_r( $log, true ) ); // phpcs:ignore
+		} elseif ( is_bool( $log ) ) {
+			error_log( $log ? 'true' : 'false' ); // phpcs:ignore
+		} else {
+			error_log( $log ); // phpcs:ignore
+		}
+	}
+}

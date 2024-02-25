@@ -42,7 +42,7 @@ $defaults = [
 	'id_remember'    => 'rememberme',
 	'id_submit'      => 'wp-submit',
 	'remember'       => true,
-	'value_username' => ( isset( $_POST['user_login'] ) && is_string( $_POST['user_login'] ) ) ? wp_unslash( $_POST['user_login'] ) : '', // phpcs:ignore.
+	'value_username' => ( isset( $_GET['user_login'] ) && is_string( $_GET['user_login'] ) ) ? wp_unslash( $_GET['user_login'] ) : '', // phpcs:ignore.
 	// Set 'value_remember' to true to default the "Remember me" checkbox to checked.
 	'value_remember' => false,
 ];

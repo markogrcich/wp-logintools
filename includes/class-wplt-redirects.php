@@ -28,9 +28,6 @@ class Wplt_Redirects {
 		// Redirect to our custom "reset-password" page.
 		add_action( 'login_form_rp', [ $this, 'redirect_from_password_reset' ] );
 		add_action( 'login_form_resetpass', [ $this, 'redirect_from_password_reset' ] );
-		// Resets the user's password if the password reset form was submitted.
-		// add_action( 'login_form_rp', array( $this, 'reset_password_page_submit' ) );
-		// add_action( 'login_form_resetpass', array( $this, 'reset_password_page_submit' ) );
 	}
 
 	/**
@@ -192,17 +189,19 @@ class Wplt_Redirects {
 			$reset_pass_key = ( isset( $_REQUEST['key'] ) ) ? $_REQUEST['key'] : false; // phpcs:ignore
 			$user_name      = ( isset( $_REQUEST['login'] ) ) ? $_REQUEST['login'] : false; // phpcs:ignore
 
-			// Check if reset password page page is present.
-			$password_reset_page = wplt_get_page_url( 'reset-password' );
+			// Check if reset password page page is present. Use home_url() if it does not.
+			$password_reset_page = ( wplt_get_page_url( 'reset-password' ) ) ? wplt_get_page_url( 'reset-password' ) : home_url( '/' );
 
-			// Check if lost password page page is present.
-			$password_page = wplt_get_page_url( 'lost-password' );
+			// Check if lost password page page is present. Use home_url() if it does not.
+			$password_page = ( wplt_get_page_url( 'lost-password' ) ) ? wplt_get_page_url( 'lost-password' ) : home_url( '/' );
 
-			// Check if login page is present.
-			$login_page = wplt_get_page_url( 'login' );
-
-			// Bail early if login or "reset password" page is not present.
-			if ( ! $password_reset_page || ! $password_page || ! $login_page ) {
+			// If password reset key or user name are not present, redirect to "reset-password" page, along with an error.
+			if ( ! $reset_pass_key || ! $user_name ) {
+				$wp_error = new WP_Error();
+				$wp_error->add( 'password_reset_empty_keys', __( 'Your url is not correct. Please make sure to follow the proper url you recived in your email.', 'wplt' ) );
+				$message      = wplt_encode_message( $wp_error );
+				$redirect_url = add_query_arg( 'wplt_query', $message, $password_page );
+				wp_safe_redirect( $redirect_url );
 				exit;
 			}
 
@@ -212,6 +211,7 @@ class Wplt_Redirects {
 				// Errors are found.
 				$message      = wplt_encode_message( $user );
 				$redirect_url = add_query_arg( 'wplt_query', $message, $password_page );
+				wp_safe_redirect( $redirect_url );
 				exit;
 			}
 
@@ -226,13 +226,6 @@ class Wplt_Redirects {
 			wp_safe_redirect( $redirect_url );
 			exit;
 		}
-	}
-
-	/**
-	 * Resets the user's password if the password reset form was submitted.
-	 */
-	public function reset_password_page_submit() {
-
 	}
 }
 new Wplt_Redirects();
