@@ -28,20 +28,25 @@ class Wplt_Redirects {
 		// Redirect to our custom "reset-password" page.
 		add_action( 'login_form_rp', [ $this, 'redirect_from_password_reset' ] );
 		add_action( 'login_form_resetpass', [ $this, 'redirect_from_password_reset' ] );
+		// Redirects to our custom "registration" page.
+		add_action( 'login_form_register', [ $this, 'redirect_from_register_page' ] );
+		// On user registration form submit.
+		add_action( 'login_form_register', [ $this, 'register_page_submit' ] );
 	}
 
 	/**
 	 * Redirect from login form to our custom login page.
 	 */
 	public function redirect_from_login_page() {
-		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' === $_SERVER['REQUEST_METHOD'] ) {
-			// Check if login page is present.
-			$login_page = wplt_get_page_url( 'login' );
+		// Check if login page is present.
+		$login_page = wplt_get_page_url( 'login' );
 
-			// Bail early if login page is not present.
-			if ( ! $login_page ) {
-				exit;
-			}
+		// Bail early if login page is not present.
+		if ( ! $login_page ) {
+			return;
+		}
+
+		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' === $_SERVER['REQUEST_METHOD'] ) {
 
 			// Set redirect url.
 			$redirect_to = isset( $_REQUEST['redirect_to'] ) ? sanitize_url( wp_unslash( $_REQUEST['redirect_to'] ) ) : null; // phpcs:ignore
@@ -121,14 +126,15 @@ class Wplt_Redirects {
 	 * wp-login.php?action=lostpassword.
 	 */
 	public function redirect_from_lostpassword() {
-		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' === $_SERVER['REQUEST_METHOD'] ) {
-			// Check if lost password page page is present.
-			$password_page = wplt_get_page_url( 'lost-password' );
+		// Check if lost password page page is present.
+		$password_page = wplt_get_page_url( 'lost-password' );
 
-			// Bail early if login page is not present.
-			if ( ! $password_page ) {
-				exit;
-			}
+		// Bail early if login page is not present.
+		if ( ! $password_page ) {
+			return;
+		}
+
+		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' === $_SERVER['REQUEST_METHOD'] ) {
 
 			// Set redirect url.
 			$redirect_to = isset( $_REQUEST['redirect_to'] ) ? sanitize_url( wp_unslash( $_REQUEST['redirect_to'] ) ) : null; // phpcs:ignore
@@ -149,18 +155,18 @@ class Wplt_Redirects {
 	 * On "lost password" page submit.
 	 */
 	public function lostpassword_page_submit() {
+		// Check if lost password page page is present.
+		$password_page = wplt_get_page_url( 'lost-password' );
+
+		// Check if login page is present.
+		$login_page = wplt_get_page_url( 'login' );
+
+		// Bail early if login or "lost password" page is not present.
+		if ( ! $password_page || ! $login_page ) {
+			return;
+		}
+
 		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] ) {
-			// Check if lost password page page is present.
-			$password_page = wplt_get_page_url( 'lost-password' );
-
-			// Check if login page is present.
-			$login_page = wplt_get_page_url( 'login' );
-
-			// Bail early if login or "lost password" page is not present.
-			if ( ! $password_page || ! $login_page ) {
-				exit;
-			}
-
 			// Check the status of "retrive password".
 			$retrive_status = retrieve_password();
 			if ( is_wp_error( $retrive_status ) ) {
@@ -183,17 +189,22 @@ class Wplt_Redirects {
 	 * Redirect to our custom "reset-password" page.
 	 */
 	public function redirect_from_password_reset() {
+		// Check if reset password page page is present.
+		$password_reset_page = wplt_get_page_url( 'reset-password' );
+
+		// Check if lost password page page is present.
+		$password_page = wplt_get_page_url( 'lost-password' );
+
+		// Bail early if "reset password" or "lost password" pages are not present.
+		if ( ! $password_page || ! $password_reset_page ) {
+			return;
+		}
+
 		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' === $_SERVER['REQUEST_METHOD'] ) {
 
 			// Check for $_REQUEST params.
 			$reset_pass_key = ( isset( $_REQUEST['key'] ) ) ? $_REQUEST['key'] : false; // phpcs:ignore
 			$user_name      = ( isset( $_REQUEST['login'] ) ) ? $_REQUEST['login'] : false; // phpcs:ignore
-
-			// Check if reset password page page is present. Use home_url() if it does not.
-			$password_reset_page = ( wplt_get_page_url( 'reset-password' ) ) ? wplt_get_page_url( 'reset-password' ) : home_url( '/' );
-
-			// Check if lost password page page is present. Use home_url() if it does not.
-			$password_page = ( wplt_get_page_url( 'lost-password' ) ) ? wplt_get_page_url( 'lost-password' ) : home_url( '/' );
 
 			// If password reset key or user name are not present, redirect to "reset-password" page, along with an error.
 			if ( ! $reset_pass_key || ! $user_name ) {
@@ -225,6 +236,117 @@ class Wplt_Redirects {
 			);
 			wp_safe_redirect( $redirect_url );
 			exit;
+		}
+	}
+
+	/**
+	 * Redirects to our custom "registration" page.
+	 */
+	public function redirect_from_register_page() {
+		// Check if login page is present.
+		$register_page = wplt_get_page_url( 'register' );
+
+		// Bail early if login page is not present.
+		if ( ! $register_page ) {
+			return;
+		}
+
+		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' === $_SERVER['REQUEST_METHOD'] ) {
+			if ( is_user_logged_in() ) {
+				$this->redirect_logged_in_user();
+			} else {
+				wp_safe_redirect( $register_page );
+			}
+			exit;
+		}
+	}
+
+	/**
+	 * On user registration form submit.
+	 */
+	public function register_page_submit() {
+		// Check if register page is present.
+		$register_page = wplt_get_page_url( 'register' );
+
+		// Check if login page is present.
+		$login_page = wplt_get_page_url( 'login' );
+
+		// Bail early if login or register page is not present.
+		if ( ! $login_page || ! $register_page ) {
+			return;
+		}
+
+		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] ) {
+			$wp_error = new WP_Error();
+			if ( ! get_option( 'users_can_register' ) ) {
+				// Registration closed, display error.
+				$wp_error->add( 'registration_closed', __( 'Sorry, user registration is closed right now.', 'wplt' ) );
+				$message      = wplt_encode_message( $wp_error );
+				$redirect_url = add_query_arg(
+					[
+						'wplt_query' => $message,
+					],
+					$login_page
+				);
+				wp_safe_redirect( $redirect_url );
+				exit;
+			} else {
+				// Check for nonce.
+				if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['security'] ) ), 'wplt_register' ) ) {
+					// Nonce checks failed, display error.
+					$wp_error->add( 'registration_nonce_error', __( 'Security checks failed. Refresh the page and try again.', 'wplt' ) );
+				}
+
+				$user_login = ( isset( $_POST['user_login'] ) ) ? sanitize_text_field( wp_unslash( $_POST['user_login'] ) ) : false;
+				$user_email = ( isset( $_POST['user_email'] ) && is_email( wp_unslash( $_POST['user_email'] ) ) ) ? sanitize_email( wp_unslash( $_POST['user_email'] ) ) : false;
+
+				// User login empty, return an error.
+				if ( ! $user_login ) {
+					$wp_error->add( 'registration_field_empty_login', __( 'Username field can not be empty.', 'wplt' ) );
+				}
+				if ( ! $user_email ) {
+					$wp_error->add( 'registration_field_empty_email', __( 'Email field can not be empty.', 'wplt' ) );
+				}
+
+				// If we have error messages, bail right now.
+				if ( $wp_error->get_error_messages() ) {
+					$message      = wplt_encode_message( $wp_error );
+					$redirect_url = add_query_arg(
+						[
+							'wplt_query' => $message,
+						],
+						$register_page
+					);
+					wp_safe_redirect( $redirect_url );
+					exit;
+				}
+
+				// Register user.
+				$user_registration_results = register_new_user( $user_login, $user_email );
+
+				if ( is_wp_error( $user_registration_results ) ) {
+					// Registration failed. Display an error message, and login to register page.
+					$message     = wplt_encode_message( $user_registration_results );
+					$redirect_to = add_query_arg(
+						[
+							'wplt_query' => $message,
+						],
+						$register_page
+					);
+				} else {
+					// Success. Display message, redirect to login page.
+					$message     = wplt_encode_message( __( 'Registration successful. Please check your email for login details.' ) );
+					$redirect_to = add_query_arg(
+						[
+							'wplt_query' => $message,
+							'user_login' => $user_login,
+						],
+						$login_page
+					);
+				}
+				wp_safe_redirect( $redirect_to );
+				exit;
+			}
 		}
 	}
 }
